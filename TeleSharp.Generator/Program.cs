@@ -80,7 +80,7 @@ namespace TeleSharp.Generator
                     string fields = "";
                     foreach (var tmp in c.Params)
                     {
-                        fields += $"     public {CheckForFlagBase(tmp.type, GetTypeName(tmp.type))} {CheckForKeyword(tmp.name)} " + "{get;set;}" + Environment.NewLine;
+                        fields += $"     public {CheckForFlagBase(tmp.type, GetTypeName(tmp.type))} {CheckForKeywordAndPascalCase(tmp.name)} " + "{get;set;}" + Environment.NewLine;
                     }
                     temp = temp.Replace("/* PARAMS */", fields);
                     #endregion
@@ -93,11 +93,11 @@ namespace TeleSharp.Generator
                         {
                             if (IsTrueFlag(param.type))
                             {
-                                compute += $"flags = {CheckForKeyword(param.name)} ? (flags | {GetBitMask(param.type)}) : (flags & ~{GetBitMask(param.type)});" + Environment.NewLine;
+                                compute += $"flags = {CheckForKeywordAndPascalCase(param.name)} ? (flags | {GetBitMask(param.type)}) : (flags & ~{GetBitMask(param.type)});" + Environment.NewLine;
                             }
                             else
                             {
-                                compute += $"flags = {CheckForKeyword(param.name)} != null ? (flags | {GetBitMask(param.type)}) : (flags & ~{GetBitMask(param.type)});" + Environment.NewLine;
+                                compute += $"flags = {CheckForKeywordAndPascalCase(param.name)} != null ? (flags | {GetBitMask(param.type)}) : (flags & ~{GetBitMask(param.type)});" + Environment.NewLine;
                             }
                         }
                         temp = temp.Replace("/* COMPUTE */", compute);
@@ -146,7 +146,7 @@ namespace TeleSharp.Generator
                     string fields = "";
                     foreach (var tmp in c.Params)
                     {
-                        fields += $"        public {CheckForFlagBase(tmp.type, GetTypeName(tmp.type))} {CheckForKeyword(tmp.name)} " + "{get;set;}" + Environment.NewLine;
+                        fields += $"        public {CheckForFlagBase(tmp.type, GetTypeName(tmp.type))} {CheckForKeywordAndPascalCase(tmp.name)} " + "{get;set;}" + Environment.NewLine;
                     }
                     fields += $"        public {CheckForFlagBase(c.type, GetTypeName(c.type))} Response" + "{ get; set;}" + Environment.NewLine;
                     temp = temp.Replace("/* PARAMS */", fields);
@@ -160,11 +160,11 @@ namespace TeleSharp.Generator
                         {
                             if (IsTrueFlag(param.type))
                             {
-                                compute += $"flags = {CheckForKeyword(param.name)} ? (flags | {GetBitMask(param.type)}) : (flags & ~{GetBitMask(param.type)});" + Environment.NewLine;
+                                compute += $"flags = {CheckForKeywordAndPascalCase(param.name)} ? (flags | {GetBitMask(param.type)}) : (flags & ~{GetBitMask(param.type)});" + Environment.NewLine;
                             }
                             else
                             {
-                                compute += $"flags = {CheckForKeyword(param.name)} != null ? (flags | {GetBitMask(param.type)}) : (flags & ~{GetBitMask(param.type)});" + Environment.NewLine;
+                                compute += $"flags = {CheckForKeywordAndPascalCase(param.name)} != null ? (flags | {GetBitMask(param.type)}) : (flags & ~{GetBitMask(param.type)});" + Environment.NewLine;
                             }
                         }
                         temp = temp.Replace("/* COMPUTE */", compute);
@@ -217,8 +217,12 @@ namespace TeleSharp.Generator
             }
             return input.First().ToString().ToUpper() + input.Substring(1);
         }
-        public static string CheckForKeyword(string name)
+        public static string CheckForKeywordAndPascalCase(string name)
         {
+            name = name.Replace("_", " ");
+            name = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
+            name = name.Replace(" ", "");
+
             if (keywords.Contains(name)) return "@" + name;
             return name;
         }
@@ -348,22 +352,22 @@ namespace TeleSharp.Generator
             {
                 case "#":
                 case "int":
-                    return flag ? $"bw.Write({CheckForKeyword(p.name)}.Value);" : $"bw.Write({CheckForKeyword(p.name)});";
+                    return flag ? $"bw.Write({CheckForKeywordAndPascalCase(p.name)}.Value);" : $"bw.Write({CheckForKeywordAndPascalCase(p.name)});";
                 case "long":
-                    return flag ? $"bw.Write({CheckForKeyword(p.name)}.Value);" : $"bw.Write({CheckForKeyword(p.name)});";
+                    return flag ? $"bw.Write({CheckForKeywordAndPascalCase(p.name)}.Value);" : $"bw.Write({CheckForKeywordAndPascalCase(p.name)});";
                 case "string":
-                    return $"StringUtil.Serialize({CheckForKeyword(p.name)},bw);";
+                    return $"StringUtil.Serialize({CheckForKeywordAndPascalCase(p.name)},bw);";
                 case "bool":
-                    return flag ? $"BoolUtil.Serialize({CheckForKeyword(p.name)}.Value,bw);" : $"BoolUtil.Serialize({CheckForKeyword(p.name)},bw);";
+                    return flag ? $"BoolUtil.Serialize({CheckForKeywordAndPascalCase(p.name)}.Value,bw);" : $"BoolUtil.Serialize({CheckForKeywordAndPascalCase(p.name)},bw);";
                 case "true":
-                    return $"BoolUtil.Serialize({CheckForKeyword(p.name)},bw);";
+                    return $"BoolUtil.Serialize({CheckForKeywordAndPascalCase(p.name)},bw);";
                 case "bytes":
-                    return $"BytesUtil.Serialize({CheckForKeyword(p.name)},bw);";
+                    return $"BytesUtil.Serialize({CheckForKeywordAndPascalCase(p.name)},bw);";
                 case "double":
-                    return flag ? $"bw.Write({CheckForKeyword(p.name)}.Value);" : $"bw.Write({CheckForKeyword(p.name)});";
+                    return flag ? $"bw.Write({CheckForKeywordAndPascalCase(p.name)}.Value);" : $"bw.Write({CheckForKeywordAndPascalCase(p.name)});";
                 default:
                     if (!IsFlagBase(p.type))
-                        return $"ObjectUtils.SerializeObject({CheckForKeyword(p.name)},bw);";
+                        return $"ObjectUtils.SerializeObject({CheckForKeywordAndPascalCase(p.name)},bw);";
                     else
                     {
                         if (IsTrueFlag(p.type))
@@ -383,38 +387,38 @@ namespace TeleSharp.Generator
             {
                 case "#":
                 case "int":
-                    return $"{CheckForKeyword(p.name)} = br.ReadInt32();";
+                    return $"{CheckForKeywordAndPascalCase(p.name)} = br.ReadInt32();";
                 case "long":
-                    return $"{CheckForKeyword(p.name)} = br.ReadInt64();";
+                    return $"{CheckForKeywordAndPascalCase(p.name)} = br.ReadInt64();";
                 case "string":
-                    return $"{CheckForKeyword(p.name)} = StringUtil.Deserialize(br);";
+                    return $"{CheckForKeywordAndPascalCase(p.name)} = StringUtil.Deserialize(br);";
                 case "bool":
                 case "true":
-                    return $"{CheckForKeyword(p.name)} = BoolUtil.Deserialize(br);";
+                    return $"{CheckForKeywordAndPascalCase(p.name)} = BoolUtil.Deserialize(br);";
                 case "bytes":
-                    return $"{CheckForKeyword(p.name)} = BytesUtil.Deserialize(br);";
+                    return $"{CheckForKeywordAndPascalCase(p.name)} = BytesUtil.Deserialize(br);";
                 case "double":
-                    return $"{CheckForKeyword(p.name)} = br.ReadDouble();";
+                    return $"{CheckForKeywordAndPascalCase(p.name)} = br.ReadDouble();";
                 default:
                     if (!IsFlagBase(p.type))
                     {
                         if (p.type.ToLower().Contains("vector"))
                         {
-                            return $"{CheckForKeyword(p.name)} = ({GetTypeName(p.type)})ObjectUtils.DeserializeVector<{GetTypeName(p.type).Replace("TLVector<", "").Replace(">", "")}>(br);";
+                            return $"{CheckForKeywordAndPascalCase(p.name)} = ({GetTypeName(p.type)})ObjectUtils.DeserializeVector<{GetTypeName(p.type).Replace("TLVector<", "").Replace(">", "")}>(br);";
                         }
-                        else return $"{CheckForKeyword(p.name)} = ({GetTypeName(p.type)})ObjectUtils.DeserializeObject(br);";
+                        else return $"{CheckForKeywordAndPascalCase(p.name)} = ({GetTypeName(p.type)})ObjectUtils.DeserializeObject(br);";
                     }
                     else
                     {
                         if (IsTrueFlag(p.type))
-                            return $"{CheckForKeyword(p.name)} = (flags & {GetBitMask(p.type).ToString()}) != 0;";
+                            return $"{CheckForKeywordAndPascalCase(p.name)} = (flags & {GetBitMask(p.type).ToString()}) != 0;";
                         else
                         {
                             Param p2 = new Param() { name = p.name, type = p.type.Split('?')[1] };
                             return $"if ((flags & {GetBitMask(p.type).ToString()}) != 0)" + Environment.NewLine +
                                 WriteReadCode(p2) + Environment.NewLine +
                             "else" + Environment.NewLine +
-                                $"{CheckForKeyword(p.name)} = null;" + Environment.NewLine;
+                                $"{CheckForKeywordAndPascalCase(p.name)} = null;" + Environment.NewLine;
                         }
                     }
             }
